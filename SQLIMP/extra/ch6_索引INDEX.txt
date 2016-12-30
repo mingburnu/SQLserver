@@ -1,0 +1,119 @@
+
+INDEX
+
+
+index_option>::=
+指定 PRIMARY KEY 或 UNIQUE 索引的索引選項。如需有關索引選項的詳細資訊，請參閱＜CREATE INDEX (Transact-SQL)＞。
+
+PAD_INDEX = { ON | OFF }
+指定索引填補。預設值是 OFF。
+
+FILLFACTOR = fillfactor
+指定百分比來指出在建立或變更索引期間，Database Engine 應該使各索引頁面之分葉層級填滿的程度。fillfactor 必須是 1 至 100 之間的整數值。預設值是 0。
+
+IGNORE_DUP_KEY = { ON | OFF }
+指定在唯一叢集或唯一非叢集索引的多資料列 INSERT 交易中，對於索引鍵值重複的錯誤回應。預設值是 OFF。
+
+STATISTICS_NORECOMPUTE = { ON | OFF }
+指定是否要重新計算散發統計資料。預設值是 OFF。
+
+ALLOW_ROW_LOCKS = { ON | OFF }
+指定是否允許資料列鎖定。預設值是 ON。
+
+ALLOW_PAGE_LOCKS = { ON | OFF }
+指定是否允許頁面鎖定。預設值是 ON。
+
+--對 計算欄位建索引時須事先設定七個選項
+
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+SET ARITHABORT ON
+SET CONCAT_NULL_YIELDS_NULL ON
+SET QUOTED_IDENTIFIER ON
+
+SET NUMERIC_ROUNDABORT OFF
+
+--建table
+create table com
+( lo int,
+  hi int,
+  av as (lo+hi)/2
+ )
+
+--建 計算欄之index
+ 
+ create index ix_com_av on com(av)
+
+--------------------------------------------------------------------
+
+DBCC DBREINDEX 
+   等同 alter index xx on 表 REBUILD
+
+DBCC DBINDEXDEFRAG
+   等同 alter index xx on 表 REORGANIZE
+
+
+--------------------------------------------------------------------
+例  A. 重建索引: 下列範例會在 Employee 資料表上，重建單一索引。
+
+USE AdventureWorks;
+GO
+ALTER INDEX PK_Employee_EmployeeID ON HumanResources.Employee
+REBUILD;
+GO
+
+--------------------------------------------------------------------
+例  停用索引: 下列範例停用 Employee 資料表的非叢集索引。
+
+USE AdventureWorks;
+GO
+ALTER INDEX IX_Employee_ManagerID ON HumanResources.Employee
+DISABLE ;
+GO
+
+--------------------------------------------------------------------
+例 停用條件約束: 下列範例藉由停用 PRIMARY KEY 索引來停用 PRIMARY KEY 條件約束。基礎資料表的 FOREIGN KEY 條件約束會自動停用，並且會顯示一則警告訊息。
+
+USE AdventureWorks;
+GO
+ALTER INDEX PK_Department_DepartmentID ON HumanResources.Department
+DISABLE ;
+GO
+
+
+--------------------------------------------------------------------
+例  啟用條件約束: 下列範例啟用 F 範例所停用的 PRIMARY KEY 和 FOREIGN KEY 條件約束。
+PRIMARY KEY 條件約束是藉由重建 PRIMARY KEY 索引來啟用的。
+
+USE AdventureWorks;
+GO
+ALTER INDEX PK_Department_DepartmentID ON HumanResources.Department
+REBUILD ;
+GO
+
+--之後，便啟用 FOREIGN KEY 條件約束。
+
+ALTER TABLE HumanResources.EmployeeDepartmentHistory
+CHECK CONSTRAINT FK_EmployeeDepartmentHistory_Department_DepartmentID;
+GO
+
+--------------------------------------------------------------------
+例  在資料表上重建所有索引以及指定選項: 下列範例指定 ALL 關鍵字。
+這會重建關聯於資料表的所有索引。指定三個選項。
+
+
+USE AdventureWorks;
+GO
+ALTER INDEX ALL ON Production.Product
+REBUILD WITH (FILLFACTOR = 80, SORT_IN_TEMPDB = ON,
+              STATISTICS_NORECOMPUTE = ON);
+GO
+
+ 
+
+--------------------------------------------------------------------
+ 
+
+
+ 

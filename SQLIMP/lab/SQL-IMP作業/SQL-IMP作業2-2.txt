@@ -1,0 +1,107 @@
+
+2 寫一支 JAVA程式 Procedure1.java 包含兩個功能
+  a 輸入一筆電影 放映時間, 電影代號, 廳院 到 playlist 放映表格
+  b 參考廳院座位表, 產生(新增)指定場次的電影座次表 到 seats表格
+
+提示
+   a 先執行 scripts 建立表格
+   b JAVA程式中 呼叫 JDBC 輸入'2009-12-25 13:00', 1, 'A廳' 到 playlist 表格
+     insert into playlist values ('2009-12-25 13:00', 1, 'A廳');
+
+   c JAVA程式中 參考廳院座位表, 寫一個迴圈 將該場次座位新增到 seats 表格 
+    
+   --先查尋 指定廳院之座位數 row, col
+   --根據座位數 v_row, v_col 產生座位表 寫迴圈 insert 
+     insert into seats values ('2009-12-25 13:00', 1, v_row-v_col組合, '0', NULL);
+
+說明 已事先建好 相關表格
+ 1 放映表格 table: playlist 
+   欄位:
+     ptime      datetime      --放映時間
+     movie      int           --電影代號
+     roomid     varchar(10)   --廳院            
+
+ 2 每廳院座位數 table:  m_room    
+   欄位:
+     roomid     varchar(10)     --廳院
+     seat_row   int             --列數
+     seat_col   int             --排數
+     
+ 3 座位表 table:  seats    
+   欄位:
+     ptime      datetime,    --放映時間
+     movie      int          --電影代號
+     seat_num   char(5)      --由 row於col組合  12-15　第12排15號
+     sold       char(1)      -- 1 表　售出,  0 表未售出
+     custid     int          -- 客戶id 預設 null 
+
+ **先暫不用建立　客戶資料, 訂購明細 等表格
+
+測試輸出指令:
+   1 select * from seats where ...
+   2 select CONVERT(varchar(16), ptime ,121),  ...  from seats
+   3 select CAST(ptime as varchar(16)), ..          from seats ...
+
+ptime            movie       seat_num sold custid
+---------------- ----------- -------- ---- -----------
+2009-12-25 13:00 1           01-01    0    NULL
+2009-12-25 13:00 1           01-02    0    NULL
+:
+2009-12-25 13:00 1           20-20    0    NULL
+
+--可, 但不佳
+2009-12-25 13:00  1        09- 15   0      NULL
+2009-12-25 13:00  1         9-6     0      NULL
+12 25 2009  1:00 1           03-12    0    NULL
+
+
+   **注意 12-15表 12排15號 須由程式中轉換
+   會自動產生 底下筆數 　ROW * COL 筆
+   insert into seats values ('2009-12-25 13:00', 1, '12-15, '0', NULL);
+      
+ 
+--先執行 scripts 建立表格---------------------
+--rem 放映表格 playlist:
+
+USE northwind   
+GO
+
+create table playlist
+(
+  ptime      datetime,     
+  movie      int,           
+  roomid     varchar(10)          
+);  
+GO
+
+--rem 廳院表 m_room:
+
+create table m_room
+(
+  roomid     varchar(10),     
+  seat_row   int,           
+  seat_col   int           
+);   
+GO
+     
+insert into m_room values ('A廳', 25,20);
+insert into m_room values ('B廳', 20,20);
+insert into m_room values ('C廳', 15,15);
+GO
+
+--rem 座位表 table:  seats
+    
+create table seats
+(
+  ptime      datetime,
+  movie      int,
+  seat_num   char(5),      
+  sold       char(1),      
+  custid     int
+);     
+GO
+
+select * from m_room;
+go
+
+--結束 scripts ---------------------------------------------------------------

@@ -1,0 +1,100 @@
+2005
+在SQL Server 2005 Management Studio 的Management 底下的Activity Monitor 可觀察到
+與Transaction Lock 資訊, 包括Lock by Process, Lock by Object 等. 
+相關語法如 sp_lock, sp_who 等, 仍能繼續使用. 
+
+SQL Server 2005 新增許多系統檢視表 DMV (Dynamic Management View) 
+如 sys.dm_tran_locks 亦是很好用的工具. 
+
+http://msdn.microsoft.com/en-us/library/ms175518.aspx
+
+2008
+若要開啟「活動監視器」  
+
+方法 1 右鍵 instance/活動監視器
+
+x 方法 2 在 SQL Server Management Studio 中，使用 [物件總管] 與伺服器連接，展開 [管理]，
+        然後連按兩下 [活動監視器]。
+
+方法 3 任何時候按 CTRL+ALT A
+
+方法 4 工具/選項/一般 開啟時 "物件總管及活動監視器"
+
+
+
+  To open Activity Monitor in SQL Server Management Studio 
+1.On the SQL Server Management Studio standard toolbar, click Activity Monitor.
+
+2.In the Connect to Server dialog box, select the server name and authentication mode, and then click Connect.
+
+3 You can also open Activity Monitor at any time by pressing CTRL+ALT A.
+
+4   To open Activity Monitor in Object Explorer 
+    In Object Explorer, right-click the instance name, and then select Activity Monitor.
+
+  To open Activity Monitor when opening SQL Server Management Studio 
+1.On the Tools menu, click Options.
+2.In the Options dialog box, expand Environment, and then select General.
+3.In the At startup box, select Open Object Explorer and Activity Monitor.
+4.To activate the changes, close and reopen SQL Server Management Studio.
+
+
+類別:
+The Activity Monitor page has the following sections:
+
+概觀 Overview - Shows graphical displays of the percent of processor time, number of waiting tasks, database I/O (megabytes per second), and batch requests (number per second).
+處理序 Active User Tasks - Shows information for active user connections to SQL Server Database Engine.
+資源等候 Resource Waits - Shows wait state information.
+資料檔案I/O Data File I/O - Shows I/O information for database data and log files.
+最近且費時的查詢 Recent Expensive Queries - Shows information about the most expensive queries.
+
+
+--測試
+test 2 session
+
+1 session 1
+  use northwind
+  go
+  begin transaction
+  update Employees set City = 'Tacoma1' where EmployeeID = 2
+  go
+
+2 session 2
+
+  select * from employees  --會 Hang住
+  go
+
+3 右鍵 instance/活動監視器 : 展開 處理序 / 下拉 資料庫 篩選 縮小範圍
+
+  看 工作階段識別碼 sid/  等候類型/ 封鎖者: 右鍵 命令  可看下甚指令
+
+  殺 鎖住者 / 點 鎖住資源的 id 右鍵/ 終止處理程序
+
+或 sp_who   
+   sp_lock 找出  spid 及 blk 之id
+   kill 鎖住之id
+
+或 回session 1
+rollback 
+go
+
+--sp_lock
+--55 正在修改取得 table: IX  key: X ; 鎖住 52 讀取 table: IS , Key: S 狀態 WAIT
+--從 objectid 查表格名 select object_id, name from sys.objects  where object_id = 2105058535
+  得知是 employees 表格
+--從 dbid 查表格名 select database_id, name from sys.databases where database_id = 11
+
+
+spid   dbid   ObjId       IndId  Type Resource                         Mode
+Status
+------ ------ ----------- ------ ---- -------------------------------- -------- ------
+    52     11           0      0 DB                                    S        GRANT
+    52     11  2105058535      1 PAG  1:209                            IS       GRANT
+    52     11  2105058535      0 TAB                                   IS       GRANT
+    52     11  2105058535      1 KEY  (020068e8b274)                   S        WAIT
+
+    55     11  2105058535      0 TAB                                   IX       GRANT
+    55     11  2105058535      1 KEY  (020068e8b274)                   X        GRANT
+    55     11  2105058535      1 PAG  1:209                            IX       GRANT
+    55     11           0      0 DB                                    S        GRANT
+

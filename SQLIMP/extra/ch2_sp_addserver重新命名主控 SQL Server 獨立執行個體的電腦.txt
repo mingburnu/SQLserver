@@ -1,0 +1,29 @@
+
+重新命名主控 SQL Server 獨立執行個體的電腦
+1 若為主控 SQL Server 預設執行個體的重新命名電腦，請執行下列程序：  
+
+sp_dropserver <old_name>;
+GO
+sp_addserver <new_name>, local;
+GO
+重新啟動 SQL Server 的執行個體
+
+
+2 若為主控 SQL Server 具名執行個體的重新命名電腦，請執行下列程序：  
+
+sp_dropserver <old_name\instancename>;
+GO
+sp_addserver <new_name\instancename>, local;
+GO
+
+
+重新啟動 SQL Server 的執行個體。
+
+------------------------------------------------
+
+從 @@SERVERNAME 或 sys.servers 中選取資訊。  @@SERVERNAME 函數將傳回新名稱，而且 sys.servers 資料表將顯示新名稱。 
+
+SELECT @@SERVERNAME AS 'Server Name';
+
+
+

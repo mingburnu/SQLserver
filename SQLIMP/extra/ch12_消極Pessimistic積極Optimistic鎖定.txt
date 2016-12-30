@@ -1,0 +1,162 @@
+
+Pessimistic vs Optimistic
+  ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.zh-CHT/s10de_1devconc/html/829c973e-b1d0-422c-b951-43c5968e95eb.htm
+  http://msdn.microsoft.com/en-us/library/aa213031(SQL.80).aspx
+
+當有許多人會同時嘗試修改資料庫中的資料時，必須實作一個控制系統，這樣某一個人所做的修改才不會嚴重影響
+到另一個人所做的修改。這就叫做並行控制。
+
+並行控制理論將制定並行控制的方法分為二類：
+
+1 悲觀並行控制
+
+鎖定系統可防止使用者以會影響其他使用者的方法來修改資料。使用者在執行某個動作而造成套用鎖定之後，
+其他使用者就不能執行會與該鎖定衝突的動作，直到擁有者解除鎖定為止。這就叫做封閉式並行控制，因為
+這種方法主要是用在高度爭用資料的環境中，以鎖定方式來保護資料的成本，會低於發生並行衝突時回復交易的成本。
+
+
+2 樂觀並行控制
+
+在開放式並行控制中，使用者在讀取資料時，不會將資料鎖定。當使用者更新資料時，系統會查看在讀取資料之後，
+是否有其他使用者變更了該資料。若有其他使用者更新了該資料，就會產生錯誤。一般而言，收到錯誤的使用者會
+回復交易，並重新開始。這就叫做開放式並行控制，因為這種方法主要是用在低度爭用資料的環境中，偶爾回復交易
+的成本會低於讀取時鎖定資料的成本。
+
+Microsoft SQL Server 可支援並行控制的範圍。使用者可針對連接來選取交易隔離等級，或是在資料指標上選取
+並行選項，以指定並行控制的類型。這些屬性可用 Transact-SQL 陳述式來定義，或是透過資料庫應用程式發展
+介面 (API) (例如 ADO、ADO.NET、OLE DB 及 ODBC) 的內容及屬性來定義。
+
+如需資料指標中之並行作業的詳細資訊，請參閱＜資料指標並行 (Database Engine)＞。
+如需交易隔離等級的詳細資訊，請參閱＜Database Engine 中的隔離等級＞。
+
+------------------------------------------------------------------------------------------
+Database Engine 隔離等級
+   ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.zh-CHT/s10de_1devconc/html/8ac7780b-5147-420b-a539-4eb556e908a7.htm
+
+ISO 標準會定義以下隔離等級，SQL Server Database Engine 支援所有的這些隔離等級：
+
+1 讀取未認可 (隔離交易的最低等級，僅能確保不會讀取實體上已損毀的資料)。
+2 讀取認可 (「Database Engine」的預設層級)
+3 可重覆讀取
+4 可序列化 (最高的等級，使交易完全與其他交易隔離)
+
+
+SQL Server 也支援兩個使用資料列版本控制的交易隔離等級。其中一個是讀取認可隔離的新實作，而另一個
+則是新的交易隔離等級，也就是快照。
+
+當 READ_COMMITTED_SNAPSHOT 資料庫選項設為 ON 時，讀取認可隔離會使用資料列版本控制以提供陳述式層級
+的讀取一致性。讀取作業只需要 SCH-S 資料表層級的鎖定，並不需要頁面或資料列的鎖定。
+當 READ_COMMITTED_SNAPSHOT 資料庫選項設為預設值 OFF 時，讀取認可隔離的運作方式會與舊版的 SQL Server 
+之運作方式相同。這兩種實作都符合讀取認可隔離的 ANSI 定義。
+
+
+快照隔離等級使用資料列版本控制來提供交易層級的讀取一致性。讀取作業並不需要頁面或資料列的鎖定，
+只需要 SCH-S 資料表鎖定。當讀取其他交易所修改的資料列時，它們會擷取在啟動交易時就已經存在的資料列版本。
+當 ALLOW_SNAPSHOT_ISOLATION 資料庫選項設為 ON 時，就會啟用快照隔離。根據預設，使用者資料庫的此選項為 OFF。
+
+
+下表顯示不同隔離等級所啟用的並行副作用。
+
+隔離等級  中途讀取 (Dirty read)  非可重覆讀取  幽靈 (Phantom)  
+讀取未認可  是                   是            是 
+讀取認可    否                   是            是
+可重覆讀取  否                   否            是
+快照集      否                   否            否
+可序列化    否                   否            否
+ 
+-Concurrency 現象----------------------------------------------------------------------
+ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.en/s10de_1devconc/html/ce529d47-7ff1-4356-b16b-3bd653baf951.htm
+
+Users modifying data can affect other users who are reading or modifying the same data at the same time.
+These users are said to be accessing the data concurrently. If a data storage system has no
+concurrency control, users could see the following side effects: 
+
+1 Lost updates
+2 Uncommitted dependency (dirty read)
+3 Inconsistent analysis (nonrepeatable read)
+4 Phantom reads
+5 Missing and double reads caused by row updates
+
+解釋
+
+
+
+1 Lost Updates
+Lost updates occur when two or more transactions select the same row and then update
+ the row based on the value originally selected. Each transaction is unaware of 
+the other transactions. The last update overwrites updates made by the other 
+transactions, which results in lost data.
+
+For example, two editors make an electronic copy of the same document. 
+Each editor changes the copy independently and then saves the changed copy 
+thereby overwriting the original document. The editor who saves the changed copy 
+last overwrites the changes made by the other editor. This problem could be avoided if one editor could not access the file until the other editor had finished and committed the transaction.
+
+2 Uncommitted Dependency (Dirty Read)
+Uncommitted dependency occurs when a second transaction selects a row that is 
+being updated by another transaction. The second transaction is reading data that 
+has not been committed yet and may be changed by the transaction updating the row.
+
+For example, an editor is making changes to an electronic document. During the 
+changes, a second editor takes a copy of the document that includes all the 
+changes made so far, and distributes the document to the intended audience. 
+The first editor then decides the changes made so far are wrong and removes the edits and saves the document. The distributed document contains edits that no longer exist and should be treated as if they never existed. This problem could be avoided if no one could read the changed document until the first editor does the final save of modifications and commits the transaction.
+
+3 Inconsistent Analysis (Nonrepeatable Read)
+Inconsistent analysis occurs when a second transaction accesses the same row several
+ times and reads different data each time. Inconsistent analysis is similar to 
+uncommitted dependency in that another transaction is changing the data that a 
+second transaction is reading. However, in inconsistent analysis, the data read 
+by the second transaction was committed by the transaction that made the change. 
+Also, inconsistent analysis involves multiple reads (two or more) of the same 
+row, and each time the information is changed by another transaction; thus, the
+ term nonrepeatable read.
+
+For example, an editor reads the same document twice, but between each reading 
+the writer rewrites the document. When the editor reads the document for the 
+second time, it has changed. The original read was not repeatable. This problem
+ could be avoided if the writer could not change the document until the editor
+ has finished reading it for the last time.
+
+4 Phantom Reads
+Phantom reads occur when an insert or delete action is performed against a row 
+that belongs to a range of rows being read by a transaction. The transaction's 
+first read of the range of rows shows a row that no longer exists in the second 
+or succeeding read as a result of a deletion by a different transaction. 
+Similarly, the transaction's second or succeeding read shows a row that 
+did not exist in the original read as the result of an insertion by a different
+ transaction.
+
+For example, an editor makes changes to a document submitted by a writer, but
+ when the changes are incorporated into the master copy of the document by the 
+production department, they find that new unedited material has been added to 
+the document by the author. Similar to the nonrepeatable read situation, this 
+problem could be avoided if no one could add new material to the document 
+until the editor and production department finish working with the original document.
+
+5 Missing and Double Reads Caused by Row Updates
+Missing a updated row or seeing an updated row multiple times
+
+Transactions that are running at the READ UNCOMMITTED level do not issue 
+shared locks to prevent other transactions from modifying data read by the 
+current transaction. Transactions that are running at the READ COMMITTED 
+level do issue shared locks, but the row or page locks are released after 
+the row is read. In either case, when you are scanning an index, if another 
+user changes the index key column of the row during your read, the row might 
+appear again if the key change moved the row to a position ahead of your scan. 
+Similarly, the row might not appear if the key change moved the row to a position 
+in the index that you had already read. To avoid this, use the SERIALIZABLE 
+or HOLDLOCK hint, or row versioning. For more information, see Table Hints (Transact-SQL) and Row Versioning-based Isolation Levels in the Database Engine.
+
+
+Missing one or more rows that were not the target of update
+
+When you are using READ UNCOMMITTED, if your query reads rows using an 
+allocation order scan (using IAM pages), you might miss rows if another 
+transaction is causing a page split. This cannot occur when you are using 
+read committed because a table lock is held during a page split and does 
+not happen if the table does not have a clustered index, because updates 
+do not cause page splits.
+
+
+

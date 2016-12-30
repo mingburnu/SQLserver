@@ -1,0 +1,24 @@
+--依學員姓名分群計算總分
+
+  select  id,  SUM(score)
+  from     course
+  group by  id
+
+
+ select  s.id, s.name, c.id, c.name, c.score
+  from     course c JOIN student s
+  on       c.id =  s.id
+  order by  c.id
+  
+  
+  select  s.id,s.name, SUM(c.score), AVG(c.score)
+  from     course c JOIN student s
+  on       c.id =  s.id
+  GROUP BY  s.id, s.name
+
+  
+
+  select  name,  avg(score)
+  from     course
+  group by name
+

@@ -1,0 +1,29 @@
+
+多重觸發程序
+  sp_settriggerorder
+
+  ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.en/s10de_6tsql/html/8b75c906-7315-486c-bc59-293ef12078e8.htm
+
+  
+語法
+sp_settriggerorder [ @triggername = ] '[ triggerschema. ] triggername' 
+        , [ @order = ] 'value' 
+        , [ @stmttype = ] 'statement_type' 
+        [ , [ @namespace = ] { 'DATABASE' | 'SERVER' | NULL } ]
+
+
+註 [ @order = ] 'value'
+Is the setting for the new order of the trigger. value is varchar(10) and it can be any one of the following values.
+
+Important:   The First and Last triggers must be two different triggers.  
+
+例 A. Setting the firing order for a DML trigger
+The following example specifies that trigger uSalesOrderHeader be the first trigger to fire after an UPDATE operation occurs on the Sales.SalesOrderHeader table.
+
+
+
+
+USE AdventureWorks;
+GO
+sp_settriggerorder @triggername= 'Sales.uSalesOrderHeader', @order='First', @stmttype = 'UPDATE';
+

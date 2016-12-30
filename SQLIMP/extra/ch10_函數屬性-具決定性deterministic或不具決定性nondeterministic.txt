@@ -1,0 +1,45 @@
+ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.zh-CHT/s10de_6tsql/html/864b393f-225f-4895-8c8d-4db59ea60032.htm
+
+
+函數屬性-具決定性deterministic或不具決定性nondeterministic
+
+
+函數屬性
+在舊版的 SQL Server 中，函數只有具決定性或不具決定性兩種分類。在 SQL Server 2005 及更新版本中，
+函數有下列屬性。這些屬性的值會決定是否可以在可保存或索引的計算資料行中使用函數
+
+
+
+屬性                                               描述  附註  
+IsDeterministic  函數可分為具決定性或不具決定性。  
+   具決定性函數中允許本機資料存取。例如，每當利用一組特定輸入值來呼叫函數時都一律傳回相同結果且含有
+   相同資料庫狀態的函數，就會被標示為具決定性。
+ 
+IsPrecise :  函數可分為精確或不精確。
+ 不精確函數內含浮點作業之類的作業。
+ 
+IsSystemVerified :  SQL Server 可以驗證函數的有效位數和決定性屬性。
+  
+ 
+SystemDataAccess : 函數存取 SQL Server 之本機執行個體中的系統資料 (系統目錄或虛擬系統資料表)。
+  
+ 
+UserDataAccess : 函數存取 SQL Server 之本機執行個體中的使用者資料。
+ 併入使用者自訂資料表和暫存資料表，但不併入資料表變數。
+ 
+SQL Server 會自動判斷 Transact-SQL 函數的有效位數和決定性屬性。如需詳細資訊，
+請參閱＜使用者自訂函數設計指導方針＞。使用者可以指定 CLR 函數的資料存取和決定性屬性。
+如需詳細資訊，請參閱＜CLR 整合自訂屬性的概觀＞。
+
+若要顯示這些屬性目前的值，請使用 OBJECTPROPERTYEX。
+
+針對可叫用使用者定義函數的計算資料行建立索引
+當使用者自訂函數有下列屬性值時，可以在索引中使用叫用使用者自訂函數的計算資料行。
+
+IsDeterministic = true
+IsSystemVerified = true (除非計算資料行是保存的)
+UserDataAccess = false
+SystemDataAccess = false
+
+如需詳細資訊，請參閱＜在計算資料行上建立索引＞。
+

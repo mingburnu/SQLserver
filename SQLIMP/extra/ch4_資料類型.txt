@@ -1,0 +1,6 @@
+資料類型
+
+http://msdn.microsoft.com/zh-tw/library/ms187752.aspx
+
+ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.zh-CHT/s10de_1devconc/html/63de7291-e226-45cd-9526-6b11b7c3c3f2.htm
+

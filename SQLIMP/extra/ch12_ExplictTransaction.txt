@@ -1,0 +1,42 @@
+
+--例1 Explict Transaction
+use Northwind
+go
+
+
+drop table t1
+go
+--Automatic Transaction(自動認可交易) 指令執行後,馬上 Commit確認交易完成
+create table t1(id int, name char(10))
+go
+create unique index ix_t1_id on t1(id)  --建 一般 non unique index 無法 row level locking
+go
+insert into t1 values (10,'aa')
+insert into t1 values (20,'bb')
+select * from t1
+go
+--別的 session 亦可以馬上看到 
+
+--例2 Explict Transaction(明確交易)-開始交易
+BEGIN TRANSACTION
+insert into t1 values (30,'cc')
+select * from t1
+go
+
+--交易進行中 別的 session Hold住, 無法看到 
+
+
+--直到完成交易 
+COMMIT TRANSACTION
+
+--例3 切換成 Implict Transaction(隱含交易) 即一開始就進入交易 不用宣告 BEGIN
+SET IMPLICIT_TRANSACTIONS ON;
+GO
+update t1 set name ='dd' where id  = 30
+select * from t1
+
+--直到完成交易 
+COMMIT TRANSACTION
+--切換回預設 須宣告 BEGIN TRANSACTION 後才進入交易
+SET IMPLICIT_TRANSACTIONS OFF;
+

@@ -1,0 +1,28 @@
+錯誤碼 3145
+http://chooseinfo.blogspot.com/2008/11/microsoft-sql-server-3415.html
+
+  1 以 windows驗證登入 勿sa 或 
+  2 FAT32  勿 NTFS
+
+  win2003 + sql 2008 attach northwind時 ok
+
+
+錯誤碼 5120   但 win 7 + sql 2008 attach northwind 錯誤  (已是NTFS)
+http://www.dotblogs.com.tw/mis2000lab/archive/2010/02/10/13565.aspx
+http://www.cnblogs.com/Mblog/archive/2010/01/26/1656618.html
+[錯誤代碼]SQL Server無法附加資料庫? 錯誤碼 5120 / 作業系統: 5 權限不足
+
+
+把以前的資料庫檔案 .mdf與 . ldf兩個檔案
+
+1 放到 C:\Program Files\Microsoft SQL Server\MSSQL10.MSSQLSERVER\MSSQL\Data
+
+2 或把SampleDB資料夾 安全權限 全打開 (完全控制) /非單獨對 個別 mdf/ldf設權限
+   **2003 是須將 各別檔案 安全權限 新增 Everyone 授予 (完全控制) 非單獨對 資料夾 
+
+3 或直接以 windows驗證登入
+
+
+
+
+

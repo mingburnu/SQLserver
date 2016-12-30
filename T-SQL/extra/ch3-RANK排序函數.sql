@@ -1,0 +1,9 @@
+SELECT  last_name, SALARY , ROW_NUMBER() OVER (ORDER BY SALARY DESC)
+FROM     employees
+
+SELECT  last_name, SALARY , RANK() OVER (ORDER BY SALARY DESC)
+FROM     employees
+
+
+SELECT  last_name, SALARY , DENSE_RANK() OVER (ORDER BY SALARY DESC)
+FROM     employees

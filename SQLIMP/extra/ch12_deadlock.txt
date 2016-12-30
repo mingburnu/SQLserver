@@ -1,0 +1,50 @@
+--模擬死結(Dead Lock)
+  http://social.msdn.microsoft.com/Forums/zh-TW/240/thread/801c86c2-1652-4260-8438-9c8bee613429
+
+--1 新增資料
+create table t3(id int, n char(20))
+create clustered index i3 on t3(id)
+insert into t3 values (1,'aaa')
+insert into t3 values (2,'bbb')
+select * from t3 或   select * from t3 with (rowlock)
+go
+         n
+-------- --------------------
+       1 aaa
+       2 bbb
+
+
+--2 session 1 交易 
+
+begin transaction
+update t3 with (rowlock) set n = 'fff' where id = 1
+go
+
+
+--3 session 2 交易 
+
+begin transaction
+update t3 with (rowlock) set n = 'ccc' where id = 2
+go
+
+
+--4 session 1 交易 , lock住
+
+begin transaction
+update t3 with (rowlock) set n = 'ddd' where id = 2
+go
+
+
+--5 session 2 交易 , lock住 
+
+begin transaction
+update t3 with (rowlock)set n = 'eee' where id = 1
+go
+
+
+--6 系統自動排解 選定一個犧牲 ex session 1
+
+訊息 1205, 層級 13, 狀態 51, 伺服器 EEIT53, 行 1
+交易 (處理序識別碼 64) 在 鎖定 資源上被另一個處理序鎖死並已被選擇作為死結的犧牲者
+
+

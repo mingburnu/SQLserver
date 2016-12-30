@@ -1,0 +1,54 @@
+ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.zh-CHT/s10de_1devconc/html/b6def67e-bfea-430e-9df4-fb064218057c.htm
+
+
+CURSOR 種類
+ non scroll
+ scroll
+
+宣告 5
+
+declare
+open
+fetch
+close
+deallocate
+
+
+
+--Cursor搭配 while 顯示於畫面
+例 1
+
+USE AdventureWorks;
+GO
+DECLARE abc CURSOR FOR
+SELECT * FROM Purchasing.ShipMethod;
+OPEN abc;
+FETCH NEXT FROM abc
+WHILE (@@FETCH_STATUS = 0)
+   FETCH NEXT FROM abc;
+CLOSE abc;
+DEALLOCATE abc;
+GO
+
+
+例 2
+
+B. 在資料指標中使用 WHILE
+下列範例使用 @@FETCH_STATUS 控制 WHILE 迴圈中的資料指標活動。
+
+USE AdventureWorks;
+GO
+DECLARE Employee_Cursor CURSOR FOR
+SELECT EmployeeID, Title 
+FROM AdventureWorks.HumanResources.Employee
+WHERE ManagerID =3;
+OPEN Employee_Cursor;
+FETCH NEXT FROM Employee_Cursor;
+WHILE @@FETCH_STATUS = 0
+   BEGIN
+      FETCH NEXT FROM Employee_Cursor;
+   END;
+CLOSE Employee_Cursor;
+DEALLOCATE Employee_Cursor;
+GO
+ 

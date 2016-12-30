@@ -1,0 +1,16 @@
+
+--指定使用者擁有的結構描述, 盡量勿使用 因為 爾後要刪除 使用者時,須先將 authorization轉給 dbo
+
+ALTER AUTHORIZATION ON SCHEMA::[db_owner] TO [u1]
+GO
+
+
+--刪除 使用者 u1 失敗
+
+DROP USER [u1]
+
+--須轉給 dbo後, 才能 刪除 使用者
+ALTER AUTHORIZATION ON SCHEMA::[db_owner] TO dbo
+
+
+

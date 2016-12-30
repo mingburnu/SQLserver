@@ -1,0 +1,24 @@
+DROP TABLE stock;
+
+CREATE TABLE stock (
+	symbol	varchar(10)		PRIMARY KEY,
+	price	decimal(6,2)	NOT NULL
+);
+
+INSERT INTO stock VALUES ('DELL', 34.56);
+
+INSERT INTO stock VALUES ('IBM', 12.87);
+
+INSERT INTO stock VALUES ('MS', 56.11);
+
+INSERT INTO stock VALUES ('ORACLE', 43.12);
+
+INSERT INTO stock VALUES ('APPLE', 30.45);
+
+INSERT INTO stock VALUES ('EPSON', 61.05);
+
+INSERT INTO stock VALUES ('SUN', 22.76);
+
+INSERT INTO stock VALUES ('EBA', 49.01);
+
+

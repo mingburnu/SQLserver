@@ -1,0 +1,76 @@
+rowversion 是 timestamp同義字 但語法不同
+--timestamp 是 rowversion 資料類型的同義字，遵照資料類型同義字的行為
+--但 Transact-SQL timestamp 資料類型不同於 ISO 標準中所定義的 timestamp 資料類型。
+--timestamp 語法已被取代。未來的 Microsoft SQL Server 版本將移除這項功能。
+--請避免在新的開發工作中使用這項功能，並規劃修改目前使用這項功能的應用程式。
+
+ms-help://MS.SQLCC.v10/MS.SQLSVR.v10.zh-CHT/s10de_6tsql/html/65c9cf0e-3e8a-45f8-87b3-3460d96afb0b.htm
+
+例1 在 CREATE TABLE 或 ALTER TABLE 陳述式中，您不需要指定 timestamp 資料類型的資料行名稱，
+
+CREATE TABLE ExampleTable (PriKey int PRIMARY KEY, timestamp);
+
+例2 如果您沒有指定資料行名稱，SQL Server Database Engine 會產生 timestamp 資料行名稱；不過，rowversion 同義字不會遵照這個行為。當您使用 rowversion 時，您必須指定一個資料行名稱，例如：
+
+CREATE TABLE ExampleTable2 (PriKey int PRIMARY KEY, VerCol rowversion) ;
+
+
+--不可為 Null 的rowversion 資料行，語意等於 binary(8) 資料行。可為 Null 的 rowversion 資料行，語意等於 varbinary(8) 資料行
+
+例3 假設您要建立名為 MyTest 的資料表。您利用執行下列的 Transact-SQL 陳述式，在資料表中擴展一些資料。
+
+CREATE TABLE MyTest (myKey int PRIMARY KEY
+    ,myValue int, RV rowversion);
+GO 
+INSERT INTO MyTest (myKey, myValue) VALUES (1, 0);
+GO 
+INSERT INTO MyTest (myKey, myValue) VALUES (2, 0);
+GO
+
+select * from mytest
+go
+
+
+例4 使用下列的範例 Transact-SQL 陳述式，在更新期間將開放式並行存取控制項實作於 MyTest 資料表。
+
+DECLARE @t TABLE (myKey int);
+UPDATE MyTest
+SET myValue = 2
+    OUTPUT inserted.myKey INTO @t(myKey) 
+WHERE myKey = 1 
+    AND RV = myValue;
+IF (SELECT COUNT(*) FROM @t) = 0
+    BEGIN
+        RAISERROR ('error changing row with myKey = %d'
+            ,16 -- Severity.
+            ,1 -- State 
+            ,1) -- myKey that was changed 
+    END;
+
+myValue 代表您上次讀取資料列時，該資料列的 rowversion 資料行值。此值必須由實際的 rowversion 值取代。
+實際 rowversion 值的範例是 0x00000000000007D3。
+
+您也可以將範例 Transact-SQL 陳述式放入交易中。您可藉由在交易的範圍中查詢 @t 變數來擷取資料表已更新的 myKey 資料行，
+而不必重新查詢 MyTest 資料表。
+
+例5 下列為使用 timestamp 語法的相同範例
+CREATE TABLE MyTest2 (myKey int PRIMARY KEY
+    ,myValue int, TS timestamp);
+GO 
+INSERT INTO MyTest2 (myKey, myValue) VALUES (1, 0);
+GO 
+INSERT INTO MyTest2 (myKey, myValue) VALUES (2, 0);
+GO
+DECLARE @t TABLE (myKey int);
+UPDATE MyTest2
+SET myValue = 2
+    OUTPUT inserted.myKey INTO @t(myKey) 
+WHERE myKey = 1 
+    AND TS = myValue;
+IF (SELECT COUNT(*) FROM @t) = 0
+    BEGIN
+        RAISERROR ('error changing row with myKey = %d'
+            ,16 -- Severity.
+            ,1 -- State 
+            ,1) -- myKey that was changed 
+    END;

@@ -1,0 +1,62 @@
+--列出學員姓名及成績 (未參加考試的學員也要列出),
+ 
+--soln1
+
+select *  from student
+select *  from course
+
+select scn.sid,scn.sname,  scn.cname , c1.score
+from course c1 right outer JOIN (select sl.id sid , sl.name sname, cn.name cname 
+                                 from   student sl cross join ( select distinct name 
+                                                                from course 
+                                                              ) cn 
+                                ) scn                  
+on c1.id = scn.sid  and c1.name = scn.cname
+order by scn.sid
+
+
+--soln2
+select s.id, s.name , c1.id, c1.name, c1.score
+from   course c1 right outer JOIN ( select s.id sid, cn.name cname 
+                                   from student s cross join ( select distinct name 
+                                                               from course ) cn 
+                                 ) scn
+on c1.id = scn.sid  and c1.name = scn.cname
+ JOIN student s
+on   s.id = scn.sid
+order by s.id
+
+
+
+--額外改題為 找出有缺考的學員
+
+
+
+--額外改題為 ; ex 24號學員未參加 所有三科的考試
+insert into student values (24, '王大年','1983-04-23','09205556789');
+
+
+--額外改題為 沒有參加考試亦會登記成績為 NULL; ex 10號學員未參加 JAVA考試, 24號學員3科未考 (equal join即可)
+ insert into course values ( 10,'JAVA',null); 
+ insert into course values ( 24,'JAVA',null); 
+ insert into course values ( 24,'電概',null); 
+ insert into course values ( 24,'T-SQL',null); 
+
+
+--額外改題為 有一筆資料有成績但沒登入學員id  NULL; ex 某學員有參加 JAVA考試 但未登錄學號(right join即可)
+--或 該學員成績重覆登錄兩次(分數可能相同也可能打錯),一次有學號 一次沒學號
+ insert into course values ( NULL ,'JAVA',85); 
+
+
+--以 CTE改寫
+WITH
+cn  as ( select distinct name 
+         from course 
+       ),
+scn as ( select sl.id sid , sl.name sname, cn.name cname 
+         from   student sl cross join cn
+       )
+select scn.sid, scn.sname,  scn.cname , c1.score
+from course c1 right outer JOIN scn
+on c1.id = scn.sid  and c1.name = scn.cname           
+order by scn.sid

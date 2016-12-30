@@ -1,0 +1,37 @@
+--SET LANGUAGE 繁體中文
+select name from sys.syslanguages
+
+--
+DECLARE @Today DATETIME
+SET @Today = '12/5/2007'
+
+SET LANGUAGE Italian
+SELECT DATENAME(month, @Today) AS 'Month Name'
+
+SET LANGUAGE us_english
+SELECT DATENAME(month, @Today) AS 'Month Name' 
+GO
+
+--sp_addmessage出現要求先設英文版 再設繁體中文
+SET LANGUAGE us_english;
+
+
+GO
+EXEC sp_addmessage
+@msgnum = 50010, 
+@severity = 10, 
+@msgtext = 'Customer cannot be deleted.',
+@with_log = 'true'
+GO
+RAISERROR(50010, 10, 1) WITH LOG 
+GO
+
+--中文 要加 replace
+EXEC sp_addmessage
+@msgnum = 50010, 
+@severity = 10, 
+@msgtext = '中文Customer cannot be deleted.',
+@with_log = 'true', @replace = 'replace'
+GO
+RAISERROR(50010, 10, 1) WITH LOG 
+GO

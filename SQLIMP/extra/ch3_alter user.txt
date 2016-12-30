@@ -1,0 +1,48 @@
+
+--轉移資料庫到另一server ,已有DB 使用者, 但沒對應 login 登入
+
+/*
+http://blog.xuite.net/tolarku/blog/39283410
+http://support.microsoft.com/kb/314546/zh-tw
+*/
+
+--1 附加你的 MyIF DB
+
+--2 create login:  myif  /  myif
+
+USE master
+GO
+
+SELECT name,sid,type_desc,default_database_name
+FROM sys.sql_logins ;
+
+if exists (SELECT name FROM sys.sql_logins where name = 'myif')
+  drop login myif
+
+
+CREATE LOGIN  myif WITH PASSWORD= 'myif'              
+GO
+
+--3 指定 user myif 為登入 myif
+
+use myif
+go
+  alter user myif with login = myif
+
+  --或 EXEC sp_change_users_login 'Auto_Fix', 'myif', NULL, 'myif';
+
+
+/*
+
+--1 無法轉換沒有登入的SQL使用者
+--2 沒有對應 login帳號
+訊息 15401，層級 16，狀態 2，行 3
+找不到 Windows NT 使用者或群組 'myif'。請再一次檢查名稱。
+
+--3
+訊息 33018，層級 16，狀態 1，行 2
+無法將使用者重新對應至登入 'sa'，因為此登入已對應至資料庫中的使用者。
+
+
+
+/*

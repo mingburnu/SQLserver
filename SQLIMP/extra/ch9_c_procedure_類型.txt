@@ -1,0 +1,10 @@
+http://msdn.microsoft.com/en-us/library/aa258259(SQL.80).aspx
+
+temporary  procedure (local/global)
+ http://www.petefreitag.com/item/459.cfm
+
+remote procedure
+  http://blog.sqlauthority.com/2007/10/06/sql-server-executing-remote-stored-procedure-calling-stored-procedure-on-linked-server/
+
+Extend
+  http://msdn.microsoft.com/en-us/library/aa259583(v=SQL.80).aspx

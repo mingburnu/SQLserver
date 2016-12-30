@@ -1,0 +1,6 @@
+
+
+sp_depends 未來的 Microsoft SQL Server 版本將移除這項功能。請避免在新的開發工作中使用這項功能，
+並規劃修改目前使用這項功能的應用程式。 
+請改用 sys.dm_sql_referencing_entities 和 sys.dm_sql_referenced_entities。 
+
